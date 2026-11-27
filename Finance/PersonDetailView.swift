@@ -39,6 +39,7 @@ struct PersonDetailView: View {
                 if list.isEmpty {
                     Text(tr("No entries yet. Tap + to add one.",
                             "എൻട്രി ഇല്ല. + അമർത്തി ചേർക്കുക."))
+                        .font(FinFont.subheadline)
                         .foregroundColor(Color.white.opacity(0.6))
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
@@ -60,12 +61,12 @@ struct PersonDetailView: View {
             } header: {
                 HStack {
                     Text(tr("ENTRIES", "എൻട്രികൾ"))
-                        .font(.caption.weight(.semibold))
+                        .font(FinFont.caption)
                         .tracking(1.2)
                         .foregroundColor(FinStyle.cyan)
                     Spacer()
                     Text("\(list.count)")
-                        .font(.caption.weight(.semibold))
+                        .font(FinFont.caption)
                         .foregroundColor(Color.white.opacity(0.6))
                 }
                 .textCase(nil)
@@ -87,9 +88,11 @@ struct PersonDetailView: View {
         }
         .sheet(isPresented: $showAdd) {
             AddTransactionView(personID: person.id)
+                .font(FinFont.body)
         }
         .sheet(item: $selectedTxn) { txn in
             TransactionDetailView(txnID: txn.id)
+                .font(FinFont.body)
         }
     }
 
@@ -101,11 +104,11 @@ struct PersonDetailView: View {
                 AvatarView(name: person.name, size: 56)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(person.name)
-                        .font(FinFont.font(22))
+                        .font(FinFont.title2)
                         .foregroundColor(.white)
                     if !person.phone.isEmpty {
                         Text(person.phone)
-                            .font(.caption)
+                            .font(FinFont.caption)
                             .foregroundColor(Color.white.opacity(0.6))
                     }
                 }
@@ -114,7 +117,7 @@ struct PersonDetailView: View {
 
             if balances.isEmpty {
                 Label(tr("All settled", "കണക്ക് തീർന്നു"), systemImage: "checkmark.circle.fill")
-                    .font(.headline)
+                    .font(FinFont.headline)
                     .foregroundColor(FinStyle.receive)
             }
 
@@ -124,7 +127,7 @@ struct PersonDetailView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 8) {
                         Text(b.code)
-                            .font(.caption.weight(.bold))
+                            .font(FinFont.caption)
                             .foregroundColor(FinStyle.cyan)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 4)
@@ -134,7 +137,7 @@ struct PersonDetailView: View {
                         Text(positive
                              ? "\(person.name) \(tr("owes you", "നിങ്ങൾക്ക് തരാനുള്ളത്"))"
                              : "\(tr("You owe", "നിങ്ങൾ കൊടുക്കാനുള്ളത്")) \(person.name)")
-                            .font(.caption)
+                            .font(FinFont.caption)
                             .foregroundColor(Color.white.opacity(0.65))
                             .lineLimit(1)
                     }
@@ -162,7 +165,7 @@ struct PersonDetailView: View {
                 .foregroundColor(color)
             VStack(alignment: .leading, spacing: 3) {
                 Text(txn.type.title)
-                    .font(.subheadline.weight(.semibold))
+                    .font(FinFont.subheadline)
                     .foregroundColor(.white)
                 HStack(spacing: 6) {
                     Text(txn.date.formatted(date: .abbreviated, time: .omitted))
@@ -171,18 +174,18 @@ struct PersonDetailView: View {
                             .foregroundColor(FinStyle.cyan)
                     }
                 }
-                .font(.caption)
+                .font(FinFont.caption)
                 .foregroundColor(Color.white.opacity(0.55))
                 if !txn.note.isEmpty {
                     Text(txn.note)
-                        .font(.caption)
+                        .font(FinFont.caption)
                         .foregroundColor(Color.white.opacity(0.55))
                         .lineLimit(1)
                 }
             }
             Spacer()
             Text(money(txn.amount, txn.currency))
-                .font(FinFont.font(15))
+                .font(FinFont.subheadline)
                 .foregroundColor(color)
         }
         .cardStyle()
