@@ -1,28 +1,31 @@
 import SwiftUI
 
 enum FinStyle {
-    static let heroGradient = LinearGradient(
-        colors: [Color(red: 0.07, green: 0.12, blue: 0.30),
-                 Color(red: 0.16, green: 0.30, blue: 0.62)],
-        startPoint: .topLeading, endPoint: .bottomTrailing)
+    // MARK: - നിറങ്ങൾ
+    static let neon = Color(red: 0.12, green: 0.55, blue: 1.0)
+    static let cyan = Color(red: 0.0, green: 0.85, blue: 1.0)
+    static let receive = Color(red: 0.20, green: 0.95, blue: 0.70)
+    static let pay = Color(red: 1.0, green: 0.38, blue: 0.52)
+    static let heroReceive = FinStyle.receive
+    static let heroPay = FinStyle.pay
 
     static let accent = LinearGradient(
-        colors: [Color(red: 0.25, green: 0.45, blue: 0.95),
-                 Color(red: 0.45, green: 0.30, blue: 0.90)],
+        colors: [Color(red: 0.10, green: 0.45, blue: 1.0),
+                 Color(red: 0.0, green: 0.78, blue: 1.0)],
         startPoint: .topLeading, endPoint: .bottomTrailing)
 
-    static let receive = Color(red: 0.12, green: 0.65, blue: 0.40)
-    static let pay = Color(red: 0.88, green: 0.28, blue: 0.30)
-    static let heroReceive = Color(red: 0.50, green: 0.95, blue: 0.72)
-    static let heroPay = Color(red: 1.0, green: 0.66, blue: 0.62)
+    static let heroGradient = LinearGradient(
+        colors: [Color(red: 0.05, green: 0.13, blue: 0.33),
+                 Color(red: 0.02, green: 0.06, blue: 0.18)],
+        startPoint: .topLeading, endPoint: .bottomTrailing)
 
     static func avatarGradient(for name: String) -> LinearGradient {
         let palettes: [[Color]] = [
-            [Color(red: 0.25, green: 0.45, blue: 0.95), Color(red: 0.45, green: 0.30, blue: 0.90)],
-            [Color(red: 0.10, green: 0.65, blue: 0.60), Color(red: 0.20, green: 0.80, blue: 0.45)],
-            [Color(red: 0.95, green: 0.55, blue: 0.20), Color(red: 0.95, green: 0.35, blue: 0.40)],
-            [Color(red: 0.55, green: 0.30, blue: 0.85), Color(red: 0.90, green: 0.35, blue: 0.65)],
-            [Color(red: 0.15, green: 0.55, blue: 0.90), Color(red: 0.10, green: 0.75, blue: 0.85)]
+            [Color(red: 0.12, green: 0.55, blue: 1.0), Color(red: 0.0, green: 0.85, blue: 1.0)],
+            [Color(red: 0.45, green: 0.35, blue: 1.0), Color(red: 0.12, green: 0.55, blue: 1.0)],
+            [Color(red: 0.0, green: 0.85, blue: 0.75), Color(red: 0.20, green: 0.95, blue: 0.55)],
+            [Color(red: 0.70, green: 0.40, blue: 1.0), Color(red: 1.0, green: 0.40, blue: 0.75)],
+            [Color(red: 0.0, green: 0.75, blue: 1.0), Color(red: 0.30, green: 0.50, blue: 1.0)]
         ]
         let sum = name.unicodeScalars.reduce(0) { $0 &+ Int($1.value) }
         let colors = palettes[sum % palettes.count]
@@ -34,26 +37,98 @@ enum FinStyle {
     }
 }
 
+// MARK: - ബാക്ക്ഗ്രൗണ്ട് (ഡാർക്ക് നേവി + നിയോൺ glow)
+
+struct GlowBackground: View {
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [Color(red: 0.01, green: 0.03, blue: 0.09),
+                         Color(red: 0.02, green: 0.06, blue: 0.17)],
+                startPoint: .top, endPoint: .bottom)
+
+            Circle()
+                .fill(FinStyle.neon.opacity(0.22))
+                .frame(width: 320, height: 320)
+                .blur(radius: 100)
+                .offset(x: 150, y: -280)
+
+            Circle()
+                .fill(FinStyle.cyan.opacity(0.12))
+                .frame(width: 280, height: 280)
+                .blur(radius: 100)
+                .offset(x: -160, y: 300)
+        }
+        .ignoresSafeArea()
+    }
+}
+
+// MARK: - ഗ്ലോ കാർഡ് ബാക്ക്ഗ്രൗണ്ട്
+
+struct GlowCardBackground: View {
+    var cornerRadius: CGFloat = 24
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        ZStack {
+            shape.fill(FinStyle.heroGradient)
+            Circle()
+                .fill(FinStyle.neon.opacity(0.35))
+                .frame(width: 200, height: 200)
+                .blur(radius: 60)
+                .offset(x: 110, y: -70)
+            Circle()
+                .fill(FinStyle.cyan.opacity(0.14))
+                .frame(width: 160, height: 160)
+                .blur(radius: 60)
+                .offset(x: -120, y: 90)
+        }
+        .clipShape(shape)
+        .overlay(
+            shape.strokeBorder(
+                LinearGradient(
+                    colors: [FinStyle.cyan.opacity(0.9),
+                             FinStyle.neon.opacity(0.25),
+                             FinStyle.neon.opacity(0.6)],
+                    startPoint: .topLeading, endPoint: .bottomTrailing),
+                lineWidth: 1)
+        )
+    }
+}
+
+// MARK: - Avatar
+
 struct AvatarView: View {
     let name: String
     var size: CGFloat = 46
 
     var body: some View {
-        Text(FinStyle.initial(of: name))
-            .font(.system(size: size * 0.42, weight: .bold, design: .rounded))
-            .foregroundColor(.white)
-            .frame(width: size, height: size)
-            .background(FinStyle.avatarGradient(for: name))
-            .clipShape(Circle())
+        ZStack {
+            Circle().fill(FinStyle.avatarGradient(for: name).opacity(0.22))
+            Circle().strokeBorder(FinStyle.avatarGradient(for: name), lineWidth: 1.5)
+            Text(FinStyle.initial(of: name))
+                .font(.system(size: size * 0.42, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+        }
+        .frame(width: size, height: size)
     }
 }
+
+// MARK: - ഗ്ലാസ് card
 
 extension View {
     func cardStyle() -> some View {
         self
             .padding(14)
-            .background(Color(.secondarySystemGroupedBackground))
+            .background(Color.white.opacity(0.05))
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 3)
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.16), Color.white.opacity(0.03)],
+                            startPoint: .topLeading, endPoint: .bottomTrailing),
+                        lineWidth: 1)
+            )
     }
 }
