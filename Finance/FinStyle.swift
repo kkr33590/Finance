@@ -111,7 +111,7 @@ struct AvatarView: View {
             Circle().fill(FinStyle.avatarGradient(for: name).opacity(0.22))
             Circle().strokeBorder(FinStyle.avatarGradient(for: name), lineWidth: 1.5)
             Text(FinStyle.initial(of: name))
-                .font(.system(size: size * 0.42, weight: .bold, design: .rounded))
+                .font(FinFont.font(size * 0.42))
                 .foregroundColor(.white)
         }
         .frame(width: size, height: size)
