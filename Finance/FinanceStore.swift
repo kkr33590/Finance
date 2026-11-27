@@ -49,7 +49,6 @@ final class FinanceStore: ObservableObject {
 
     // MARK: - കണക്കുകൾ
 
-    /// ഒരാളുടെ ഓരോ കറൻസിയിലെയും net balance (0 ആയവ ഒഴിവാക്കി)
     func balances(for person: Person) -> [CurrencyBalance] {
         var dict: [String: Double] = [:]
         for t in txns where t.personID == person.id {
@@ -66,7 +65,6 @@ final class FinanceStore: ObservableObject {
             .sorted { $0.date > $1.date }
     }
 
-    /// ഓരോ കറൻസിയിലും ആകെ കിട്ടാനുള്ളതും കൊടുക്കാനുള്ളതും
     var totals: [CurrencyTotal] {
         var dict: [String: CurrencyTotal] = [:]
         for person in people {
@@ -91,6 +89,9 @@ final class FinanceStore: ObservableObject {
 
     func deletePeople(at offsets: IndexSet, from list: [Person]) {
         let ids = offsets.map { list[$0].id }
+        for t in txns where ids.contains(t.personID) {
+            ReceiptStorage.delete(t.receiptFile)
+        }
         txns.removeAll { ids.contains($0.personID) }
         people.removeAll { ids.contains($0.id) }
     }
@@ -101,6 +102,16 @@ final class FinanceStore: ObservableObject {
 
     func deleteTxns(at offsets: IndexSet, from list: [Txn]) {
         let ids = offsets.map { list[$0].id }
+        for t in txns where ids.contains(t.id) {
+            ReceiptStorage.delete(t.receiptFile)
+        }
         txns.removeAll { ids.contains($0.id) }
+    }
+
+    /// ഒരു എൻട്രിയുടെ റെസിപ്റ്റ് മാറ്റുന്നു (nil = റെസിപ്റ്റ് നീക്കം ചെയ്യുക)
+    func setReceipt(_ txnID: UUID, _ fileName: String?) {
+        guard let i = txns.firstIndex(where: { $0.id == txnID }) else { return }
+        ReceiptStorage.delete(txns[i].receiptFile)
+        txns[i].receiptFile = fileName
     }
 }
