@@ -56,12 +56,12 @@ struct RootView: View {
                         } header: {
                             HStack {
                                 Text(tr("PEOPLE", "ആളുകൾ"))
-                                    .font(.caption.weight(.semibold))
+                                    .font(FinFont.caption)
                                     .tracking(1.2)
                                     .foregroundColor(FinStyle.cyan)
                                 Spacer()
                                 Text("\(store.people.count)")
-                                    .font(.caption.weight(.semibold))
+                                    .font(FinFont.caption)
                                     .foregroundColor(Color.white.opacity(0.6))
                             }
                             .textCase(nil)
@@ -87,9 +87,11 @@ struct RootView: View {
             }
             .sheet(isPresented: $showAddPerson) {
                 AddPersonView()
+                    .font(FinFont.body)
             }
             .sheet(isPresented: $showSettings) {
                 SettingsView()
+                    .font(FinFont.body)
             }
         }
     }
@@ -123,18 +125,18 @@ struct RootView: View {
         VStack(alignment: .leading, spacing: 18) {
             HStack {
                 Text(tr("TOTAL BALANCE", "ആകെ ബാക്കി"))
-                    .font(.caption.weight(.semibold))
+                    .font(FinFont.caption)
                     .tracking(1.2)
                     .foregroundColor(FinStyle.cyan)
                 Spacer()
                 Label("\(store.people.count)", systemImage: "person.2.fill")
-                    .font(.caption.weight(.semibold))
+                    .font(FinFont.caption)
                     .foregroundColor(Color.white.opacity(0.7))
             }
 
             if store.totals.isEmpty {
                 Text(tr("No balances yet", "ബാക്കി തുക ഒന്നുമില്ല"))
-                    .font(FinFont.font(20))
+                    .font(FinFont.title3)
                     .foregroundColor(.white)
             }
 
@@ -156,7 +158,7 @@ struct RootView: View {
         return VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 Text(t.code)
-                    .font(.caption.weight(.bold))
+                    .font(FinFont.caption)
                     .foregroundColor(FinStyle.cyan)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
@@ -164,7 +166,7 @@ struct RootView: View {
                     .clipShape(Capsule())
                     .overlay(Capsule().strokeBorder(FinStyle.cyan.opacity(0.5), lineWidth: 1))
                 Text(currencyName(t.code))
-                    .font(.caption)
+                    .font(FinFont.caption)
                     .foregroundColor(Color.white.opacity(0.6))
                     .lineLimit(1)
                 Spacer()
@@ -172,7 +174,7 @@ struct RootView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(tr("Net balance", "നെറ്റ് ബാക്കി"))
-                    .font(.caption)
+                    .font(FinFont.caption)
                     .foregroundColor(Color.white.opacity(0.6))
                 Text(money(net, t.code))
                     .font(FinFont.font(32))
@@ -197,10 +199,10 @@ struct RootView: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
                 Image(systemName: icon)
-                    .font(.caption.weight(.bold))
+                    .font(.system(size: 12, weight: .bold))
                     .foregroundColor(color)
                 Text(title)
-                    .font(.caption)
+                    .font(FinFont.caption)
                     .foregroundColor(Color.white.opacity(0.7))
             }
             Text(money(value, code))
@@ -226,6 +228,7 @@ struct RootView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(FinStyle.neon)
             TextField(tr("Search people", "ആളുകളെ തിരയുക"), text: $query)
+                .font(FinFont.body)
                 .autocorrectionDisabled()
             if !query.isEmpty {
                 Button {
@@ -252,16 +255,16 @@ struct RootView: View {
             AvatarView(name: person.name)
             VStack(alignment: .leading, spacing: 3) {
                 Text(person.name)
-                    .font(FinFont.font(17))
+                    .font(FinFont.headline)
                     .foregroundColor(.white)
                 Text(subtitle(count: list.count, last: list.first?.date))
-                    .font(.caption)
+                    .font(FinFont.caption)
                     .foregroundColor(Color.white.opacity(0.55))
             }
             Spacer()
             balanceColumn(for: person)
             Image(systemName: "chevron.right")
-                .font(.caption.weight(.semibold))
+                .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(Color.white.opacity(0.3))
         }
         .cardStyle()
@@ -281,7 +284,7 @@ struct RootView: View {
         let balances = store.balances(for: person)
         if balances.isEmpty {
             Label(tr("Settled", "തീർന്നു"), systemImage: "checkmark.circle.fill")
-                .font(.caption.weight(.semibold))
+                .font(FinFont.caption)
                 .foregroundColor(Color.white.opacity(0.5))
         } else {
             VStack(alignment: .trailing, spacing: 6) {
@@ -290,10 +293,10 @@ struct RootView: View {
                     let color = positive ? FinStyle.receive : FinStyle.pay
                     VStack(alignment: .trailing, spacing: 3) {
                         Text(money(abs(b.amount), b.code))
-                            .font(FinFont.font(15))
+                            .font(FinFont.subheadline)
                             .foregroundColor(color)
                         Text(positive ? tr("to receive", "കിട്ടാനുള്ളത്") : tr("to pay", "കൊടുക്കാനുള്ളത്"))
-                            .font(.caption2.weight(.semibold))
+                            .font(FinFont.caption2)
                             .foregroundColor(color)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 2)
@@ -312,7 +315,7 @@ struct RootView: View {
                 .foregroundColor(FinStyle.neon)
             Text(tr("No people yet. Tap the button below to add one.",
                     "ആരും ഇല്ല. താഴെയുള്ള ബട്ടൺ അമർത്തി ഒരാളെ ചേർക്കുക."))
-                .font(.subheadline)
+                .font(FinFont.subheadline)
                 .multilineTextAlignment(.center)
                 .foregroundColor(Color.white.opacity(0.6))
         }
@@ -329,9 +332,8 @@ struct RootView: View {
             HStack(spacing: 8) {
                 Image(systemName: "person.badge.plus")
                 Text(tr("Add person", "ആളെ ചേർക്കുക"))
-                    .fontWeight(.semibold)
             }
-            .font(.subheadline)
+            .font(FinFont.subheadline)
             .foregroundColor(.white)
             .padding(.horizontal, 20)
             .padding(.vertical, 14)
