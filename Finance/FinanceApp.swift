@@ -8,6 +8,8 @@ struct FinanceApp: App {
         WindowGroup {
             RootView()
                 .environmentObject(store)
+                .preferredColorScheme(.dark)
+                .tint(FinStyle.neon)
         }
     }
 }
