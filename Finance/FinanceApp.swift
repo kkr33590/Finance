@@ -1,13 +1,13 @@
 import SwiftUI
 
-// @main marks where the app starts. WindowGroup shows the first screen.
 @main
 struct FinanceApp: App {
+    @StateObject private var store = FinanceStore()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .tint(Theme.accent)
-                .preferredColorScheme(.dark)
+            RootView()
+                .environmentObject(store)
         }
     }
 }
