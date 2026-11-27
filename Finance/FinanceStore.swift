@@ -1,5 +1,18 @@
 import Foundation
 
+struct CurrencyBalance: Identifiable {
+    let code: String
+    let amount: Double
+    var id: String { code }
+}
+
+struct CurrencyTotal: Identifiable {
+    let code: String
+    var toReceive: Double
+    var toPay: Double
+    var id: String { code }
+}
+
 final class FinanceStore: ObservableObject {
     @Published var people: [Person] = [] { didSet { save() } }
     @Published var txns: [Txn] = [] { didSet { save() } }
@@ -36,9 +49,16 @@ final class FinanceStore: ObservableObject {
 
     // MARK: - കണക്കുകൾ
 
-    func balance(for person: Person) -> Double {
-        txns.filter { $0.personID == person.id }
-            .reduce(0) { $0 + $1.signedAmount }
+    /// ഒരാളുടെ ഓരോ കറൻസിയിലെയും net balance (0 ആയവ ഒഴിവാക്കി)
+    func balances(for person: Person) -> [CurrencyBalance] {
+        var dict: [String: Double] = [:]
+        for t in txns where t.personID == person.id {
+            dict[t.currency, default: 0] += t.signedAmount
+        }
+        return dict
+            .filter { abs($0.value) > 0.005 }
+            .map { CurrencyBalance(code: $0.key, amount: $0.value) }
+            .sorted { $0.code < $1.code }
     }
 
     func transactions(for person: Person) -> [Txn] {
@@ -46,12 +66,21 @@ final class FinanceStore: ObservableObject {
             .sorted { $0.date > $1.date }
     }
 
-    var totalToReceive: Double {
-        people.map { balance(for: $0) }.filter { $0 > 0 }.reduce(0, +)
-    }
-
-    var totalToPay: Double {
-        -people.map { balance(for: $0) }.filter { $0 < 0 }.reduce(0, +)
+    /// ഓരോ കറൻസിയിലും ആകെ കിട്ടാനുള്ളതും കൊടുക്കാനുള്ളതും
+    var totals: [CurrencyTotal] {
+        var dict: [String: CurrencyTotal] = [:]
+        for person in people {
+            for b in balances(for: person) {
+                var t = dict[b.code] ?? CurrencyTotal(code: b.code, toReceive: 0, toPay: 0)
+                if b.amount > 0 {
+                    t.toReceive += b.amount
+                } else {
+                    t.toPay += -b.amount
+                }
+                dict[b.code] = t
+            }
+        }
+        return dict.values.sorted { $0.code < $1.code }
     }
 
     // MARK: - മാറ്റങ്ങൾ
