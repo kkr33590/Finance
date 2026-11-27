@@ -2,38 +2,52 @@ import SwiftUI
 
 struct RootView: View {
     @EnvironmentObject var store: FinanceStore
+    @AppStorage("appLanguage") private var lang = "ml"
     @State private var showAddPerson = false
+    @State private var showSettings = false
 
     private var sortedPeople: [Person] {
         store.people.sorted {
-            abs(store.balance(for: $0)) > abs(store.balance(for: $1))
+            $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
         }
     }
 
     var body: some View {
+        let _ = lang
         NavigationStack {
             List {
-                Section {
-                    HStack {
-                        summaryBox(title: "എനിക്ക് കിട്ടാനുള്ളത്",
-                                   value: store.totalToReceive, color: .green)
-                        Divider()
-                        summaryBox(title: "ഞാൻ കൊടുക്കാനുള്ളത്",
-                                   value: store.totalToPay, color: .red)
+                Section(tr("Summary", "ആകെ കണക്ക്")) {
+                    if store.totals.isEmpty {
+                        Text(tr("No balances yet", "ബാക്കി തുക ഒന്നുമില്ല"))
+                            .foregroundColor(.secondary)
+                    }
+                    ForEach(store.totals) { t in
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("\(t.code) – \(currencyName(t.code))")
+                                .font(.caption).foregroundColor(.secondary)
+                            HStack {
+                                summaryBox(title: tr("To receive", "എനിക്ക് കിട്ടാനുള്ളത്"),
+                                           value: t.toReceive, code: t.code, color: .green)
+                                Divider()
+                                summaryBox(title: tr("To pay", "ഞാൻ കൊടുക്കാനുള്ളത്"),
+                                           value: t.toPay, code: t.code, color: .red)
+                            }
+                        }
                     }
                 }
 
-                Section("ആളുകൾ") {
+                Section(tr("People", "ആളുകൾ")) {
                     if store.people.isEmpty {
-                        Text("ആരും ഇല്ല. മുകളിലെ + അമർത്തി ഒരാളെ ചേർക്കുക.")
+                        Text(tr("No people yet. Tap + to add one.",
+                                "ആരും ഇല്ല. മുകളിലെ + അമർത്തി ഒരാളെ ചേർക്കുക."))
                             .foregroundColor(.secondary)
                     }
                     ForEach(sortedPeople) { person in
                         NavigationLink(value: person) {
-                            HStack {
+                            HStack(alignment: .top) {
                                 Text(person.name)
                                 Spacer()
-                                balanceLabel(store.balance(for: person))
+                                balanceLines(for: person)
                             }
                         }
                     }
@@ -47,34 +61,56 @@ struct RootView: View {
                 PersonDetailView(personID: person.id)
             }
             .toolbar {
-                Button {
-                    showAddPerson = true
-                } label: {
-                    Image(systemName: "plus")
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showAddPerson = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
                 }
             }
             .sheet(isPresented: $showAddPerson) {
                 AddPersonView()
             }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
+            }
         }
     }
 
-    private func summaryBox(title: String, value: Double, color: Color) -> some View {
+    private func summaryBox(title: String, value: Double, code: String, color: Color) -> some View {
         VStack(spacing: 4) {
             Text(title).font(.caption).foregroundColor(.secondary)
-            Text(money(value)).font(.headline).foregroundColor(color)
+            Text(money(value, code)).font(.headline).foregroundColor(color)
         }
         .frame(maxWidth: .infinity)
     }
 
     @ViewBuilder
-    private func balanceLabel(_ value: Double) -> some View {
-        if value > 0 {
-            Text("കിട്ടാനുള്ളത് \(money(value))").foregroundColor(.green).font(.subheadline)
-        } else if value < 0 {
-            Text("കൊടുക്കാനുള്ളത് \(money(-value))").foregroundColor(.red).font(.subheadline)
+    private func balanceLines(for person: Person) -> some View {
+        let balances = store.balances(for: person)
+        if balances.isEmpty {
+            Text(tr("Settled", "കണക്ക് തീർന്നു"))
+                .foregroundColor(.secondary).font(.subheadline)
         } else {
-            Text("കണക്ക് തീർന്നു").foregroundColor(.secondary).font(.subheadline)
+            VStack(alignment: .trailing, spacing: 2) {
+                ForEach(balances) { b in
+                    if b.amount > 0 {
+                        Text("\(tr("To receive", "കിട്ടാനുള്ളത്")) \(money(b.amount, b.code))")
+                            .foregroundColor(.green).font(.subheadline)
+                    } else {
+                        Text("\(tr("To pay", "കൊടുക്കാനുള്ളത്")) \(money(-b.amount, b.code))")
+                            .foregroundColor(.red).font(.subheadline)
+                    }
+                }
+            }
         }
     }
 }
