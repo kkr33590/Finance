@@ -134,7 +134,7 @@ struct RootView: View {
 
             if store.totals.isEmpty {
                 Text(tr("No balances yet", "ബാക്കി തുക ഒന്നുമില്ല"))
-                    .font(.title3.weight(.semibold))
+                    .font(FinFont.font(20))
                     .foregroundColor(.white)
             }
 
@@ -175,7 +175,7 @@ struct RootView: View {
                     .font(.caption)
                     .foregroundColor(Color.white.opacity(0.6))
                 Text(money(net, t.code))
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .font(FinFont.font(32))
                     .foregroundColor(.white)
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
@@ -204,7 +204,7 @@ struct RootView: View {
                     .foregroundColor(Color.white.opacity(0.7))
             }
             Text(money(value, code))
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(FinFont.font(18))
                 .foregroundColor(color)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
@@ -252,7 +252,7 @@ struct RootView: View {
             AvatarView(name: person.name)
             VStack(alignment: .leading, spacing: 3) {
                 Text(person.name)
-                    .font(.headline)
+                    .font(FinFont.font(17))
                     .foregroundColor(.white)
                 Text(subtitle(count: list.count, last: list.first?.date))
                     .font(.caption)
@@ -290,7 +290,7 @@ struct RootView: View {
                     let color = positive ? FinStyle.receive : FinStyle.pay
                     VStack(alignment: .trailing, spacing: 3) {
                         Text(money(abs(b.amount), b.code))
-                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .font(FinFont.font(15))
                             .foregroundColor(color)
                         Text(positive ? tr("to receive", "കിട്ടാനുള്ളത്") : tr("to pay", "കൊടുക്കാനുള്ളത്"))
                             .font(.caption2.weight(.semibold))
