@@ -38,8 +38,10 @@ struct CurrencyPickerView: View {
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(code).bold()
-                    Text(currencyName(code)).font(.caption).foregroundColor(.secondary)
+                    Text(code)
+                    Text(currencyName(code))
+                        .font(FinFont.caption)
+                        .foregroundColor(.secondary)
                 }
                 Spacer()
                 if selection == code {
