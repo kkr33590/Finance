@@ -14,6 +14,7 @@ struct FinanceApp: App {
             RootView()
                 .environmentObject(store)
                 .environmentObject(cloud)
+                .font(FinFont.body)
                 .preferredColorScheme(.dark)
                 .tint(FinStyle.neon)
                 .task { cloud.attach(store) }
