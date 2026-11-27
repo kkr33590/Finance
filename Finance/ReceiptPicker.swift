@@ -51,7 +51,7 @@ struct ReceiptPicker: View {
             }
 
             if let message = message {
-                Text(message).font(.caption).foregroundColor(.red)
+                Text(message).font(FinFont.caption).foregroundColor(.red)
             }
         }
         .padding(.vertical, 4)
@@ -76,7 +76,7 @@ struct ReceiptPicker: View {
     private func tile(_ title: String, _ icon: String) -> some View {
         VStack(spacing: 6) {
             Image(systemName: icon).font(.title3)
-            Text(title).font(.caption).multilineTextAlignment(.center)
+            Text(title).font(FinFont.caption).multilineTextAlignment(.center)
         }
         .foregroundColor(.accentColor)
         .frame(maxWidth: .infinity, minHeight: 64)
