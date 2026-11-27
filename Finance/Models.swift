@@ -27,6 +27,15 @@ enum TxType: String, Codable, CaseIterable, Identifiable {
         case .repaidToMe, .borrowed: return -1
         }
     }
+
+    /// എൻ്റെ കയ്യിൽ നിന്ന് പണം പുറത്തേക്ക് പോകുന്നവ
+    var isMoneyOut: Bool {
+        self == .lent || self == .repaidByMe
+    }
+
+    var icon: String {
+        isMoneyOut ? "arrow.up.right.circle.fill" : "arrow.down.left.circle.fill"
+    }
 }
 
 struct Txn: Identifiable, Codable, Hashable {
@@ -37,15 +46,16 @@ struct Txn: Identifiable, Codable, Hashable {
     var currency: String = "INR"
     var date: Date = Date()
     var note: String = ""
+    var receiptFile: String? = nil
 
     var signedAmount: Double { amount * type.sign }
 
     enum CodingKeys: String, CodingKey {
-        case id, personID, type, amount, currency, date, note
+        case id, personID, type, amount, currency, date, note, receiptFile
     }
 }
 
-// പഴയ ഡാറ്റയിൽ currency ഇല്ല. അത് INR ആയി എടുക്കാനുള്ള decoder.
+// പഴയ ഡാറ്റയിൽ currency, receiptFile എന്നിവ ഇല്ല. അവയ്ക്ക് default നൽകുന്ന decoder.
 extension Txn {
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -56,6 +66,7 @@ extension Txn {
         currency = try c.decodeIfPresent(String.self, forKey: .currency) ?? "INR"
         date = try c.decode(Date.self, forKey: .date)
         note = try c.decodeIfPresent(String.self, forKey: .note) ?? ""
+        receiptFile = try c.decodeIfPresent(String.self, forKey: .receiptFile)
     }
 }
 
