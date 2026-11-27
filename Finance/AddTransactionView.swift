@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct AddTransactionView: View {
     @EnvironmentObject var store: FinanceStore
@@ -11,6 +12,7 @@ struct AddTransactionView: View {
     @State private var currency: String
     @State private var date = Date()
     @State private var note = ""
+    @State private var receiptImage: UIImage?
 
     init(personID: UUID) {
         self.personID = personID
@@ -54,6 +56,10 @@ struct AddTransactionView: View {
                     DatePicker(tr("Date", "തീയതി"), selection: $date, displayedComponents: .date)
                     TextField(tr("Note (optional)", "കുറിപ്പ് (optional)"), text: $note)
                 }
+
+                Section(tr("Receipt (optional)", "പേയ്മെൻറ്റ് റെസിപ്റ്റ് (optional)")) {
+                    ReceiptPicker(image: $receiptImage)
+                }
             }
             .navigationTitle(tr("New entry", "പുതിയ എൻട്രി"))
             .navigationBarTitleDisplayMode(.inline)
@@ -63,16 +69,23 @@ struct AddTransactionView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(tr("Save", "സേവ്")) {
-                        if let amount = amount, amount > 0 {
-                            store.addTxn(Txn(personID: personID, type: type,
-                                             amount: amount, currency: currency,
-                                             date: date, note: note))
-                            dismiss()
-                        }
+                        save()
                     }
                     .disabled((amount ?? 0) <= 0)
                 }
             }
         }
+    }
+
+    private func save() {
+        guard let amount = amount, amount > 0 else { return }
+        var fileName: String? = nil
+        if let img = receiptImage {
+            fileName = ReceiptStorage.save(img)
+        }
+        store.addTxn(Txn(personID: personID, type: type, amount: amount,
+                         currency: currency, date: date, note: note,
+                         receiptFile: fileName))
+        dismiss()
     }
 }
