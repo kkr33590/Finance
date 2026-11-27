@@ -1,5 +1,9 @@
 import Foundation
 
+extension Notification.Name {
+    static let financeDidChange = Notification.Name("financeDidChange")
+}
+
 struct CurrencyBalance: Identifiable {
     let code: String
     let amount: Double
@@ -16,6 +20,9 @@ struct CurrencyTotal: Identifiable {
 final class FinanceStore: ObservableObject {
     @Published var people: [Person] = [] { didSet { save() } }
     @Published var txns: [Txn] = [] { didSet { save() } }
+
+    /// Restore ചെയ്യുമ്പോൾ ഓട്ടോ ബാക്കപ്പ് ട്രിഗർ ആകാതിരിക്കാൻ
+    private var notifyChanges = true
 
     private struct Saved: Codable {
         var people: [Person]
@@ -42,9 +49,32 @@ final class FinanceStore: ObservableObject {
         do {
             let data = try JSONEncoder().encode(Saved(people: people, txns: txns))
             try data.write(to: fileURL, options: .atomic)
+            if notifyChanges {
+                NotificationCenter.default.post(name: .financeDidChange, object: nil)
+            }
         } catch {
             print("Save failed: \(error)")
         }
+    }
+
+    // MARK: - ക്ലൗഡ് ബാക്കപ്പ്
+
+    func exportJSON() -> Data? {
+        try? JSONEncoder().encode(Saved(people: people, txns: txns))
+    }
+
+    /// ബാക്കപ്പ് ഡാറ്റ ശരിയാണെങ്കിൽ മാത്രം ഫോണിലെ ഡാറ്റ മാറ്റുന്നു
+    func replaceAll(from data: Data) -> Bool {
+        guard let saved = try? JSONDecoder().decode(Saved.self, from: data) else { return false }
+        notifyChanges = false
+        people = saved.people
+        txns = saved.txns
+        notifyChanges = true
+        return true
+    }
+
+    func receiptFileNames() -> [String] {
+        txns.compactMap { $0.receiptFile }
     }
 
     // MARK: - കണക്കുകൾ
