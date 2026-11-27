@@ -71,7 +71,7 @@ struct SettingsView: View {
             if !GoogleConfig.isConfigured {
                 Text(tr("Set your Google Client ID in GoogleConfig.swift first.",
                         "ആദ്യം GoogleConfig.swift-ൽ Client ID ചേർക്കുക."))
-                    .font(.caption)
+                    .font(FinFont.caption)
                     .foregroundColor(.orange)
             }
 
@@ -99,7 +99,7 @@ struct SettingsView: View {
 
                 if let last = cloud.lastBackup {
                     Text("\(tr("Last backup", "അവസാന ബാക്കപ്പ്")): \(last.formatted(date: .abbreviated, time: .shortened))")
-                        .font(.caption)
+                        .font(FinFont.caption)
                         .foregroundColor(.secondary)
                 }
 
@@ -128,7 +128,7 @@ struct SettingsView: View {
 
             if let error = cloud.errorText {
                 Text(error)
-                    .font(.caption)
+                    .font(FinFont.caption)
                     .foregroundColor(.red)
             }
         } header: {
