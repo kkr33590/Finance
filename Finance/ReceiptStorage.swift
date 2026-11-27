@@ -35,6 +35,22 @@ enum ReceiptStorage {
         }
     }
 
+    // MARK: - ക്ലൗഡ് ബാക്കപ്പിനായി
+
+    static func data(for name: String) -> Data? {
+        try? Data(contentsOf: folder.appendingPathComponent(name))
+    }
+
+    static func write(_ data: Data, name: String) {
+        try? data.write(to: folder.appendingPathComponent(name), options: .atomic)
+    }
+
+    static func exists(_ name: String) -> Bool {
+        FileManager.default.fileExists(atPath: folder.appendingPathComponent(name).path)
+    }
+
+    // MARK: - Files ആപ്പിൽ നിന്ന്
+
     /// Files ആപ്പിൽ നിന്നുള്ള ഇമേജ് / PDF (ആദ്യ പേജ്) UIImage ആക്കുന്നു
     static func image(fromFile url: URL) -> UIImage? {
         let access = url.startAccessingSecurityScopedResource()
