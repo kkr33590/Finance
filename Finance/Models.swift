@@ -13,10 +13,10 @@ enum TxType: String, Codable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .lent: return "ഞാൻ കടം കൊടുത്തു"
-        case .repaidToMe: return "അവർ തിരിച്ചു തന്നു"
-        case .borrowed: return "ഞാൻ കടം വാങ്ങി"
-        case .repaidByMe: return "ഞാൻ തിരിച്ചു കൊടുത്തു"
+        case .lent: return tr("I lent", "ഞാൻ കടം കൊടുത്തു")
+        case .repaidToMe: return tr("They paid me back", "അവർ തിരിച്ചു തന്നു")
+        case .borrowed: return tr("I borrowed", "ഞാൻ കടം വാങ്ങി")
+        case .repaidByMe: return tr("I paid back", "ഞാൻ തിരിച്ചു കൊടുത്തു")
         }
     }
 
@@ -34,12 +34,35 @@ struct Txn: Identifiable, Codable, Hashable {
     var personID: UUID
     var type: TxType
     var amount: Double
+    var currency: String = "INR"
     var date: Date = Date()
     var note: String = ""
 
     var signedAmount: Double { amount * type.sign }
+
+    enum CodingKeys: String, CodingKey {
+        case id, personID, type, amount, currency, date, note
+    }
 }
 
-func money(_ value: Double) -> String {
-    value.formatted(.currency(code: "INR"))
+// പഴയ ഡാറ്റയിൽ currency ഇല്ല. അത് INR ആയി എടുക്കാനുള്ള decoder.
+extension Txn {
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        personID = try c.decode(UUID.self, forKey: .personID)
+        type = try c.decode(TxType.self, forKey: .type)
+        amount = try c.decode(Double.self, forKey: .amount)
+        currency = try c.decodeIfPresent(String.self, forKey: .currency) ?? "INR"
+        date = try c.decode(Date.self, forKey: .date)
+        note = try c.decodeIfPresent(String.self, forKey: .note) ?? ""
+    }
+}
+
+func money(_ value: Double, _ code: String) -> String {
+    value.formatted(.currency(code: code))
+}
+
+func currencyName(_ code: String) -> String {
+    Locale.current.localizedString(forCurrencyCode: code) ?? code
 }
