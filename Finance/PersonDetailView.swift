@@ -101,7 +101,7 @@ struct PersonDetailView: View {
                 AvatarView(name: person.name, size: 56)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(person.name)
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .font(FinFont.font(22))
                         .foregroundColor(.white)
                     if !person.phone.isEmpty {
                         Text(person.phone)
@@ -139,7 +139,7 @@ struct PersonDetailView: View {
                             .lineLimit(1)
                     }
                     Text(money(abs(b.amount), b.code))
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .font(FinFont.font(32))
                         .foregroundColor(color)
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
@@ -182,7 +182,7 @@ struct PersonDetailView: View {
             }
             Spacer()
             Text(money(txn.amount, txn.currency))
-                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .font(FinFont.font(15))
                 .foregroundColor(color)
         }
         .cardStyle()
