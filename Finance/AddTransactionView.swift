@@ -3,22 +3,31 @@ import SwiftUI
 struct AddTransactionView: View {
     @EnvironmentObject var store: FinanceStore
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("appLanguage") private var lang = "ml"
 
     let personID: UUID
     @State private var type: TxType = .lent
     @State private var amountText = ""
+    @State private var currency: String
     @State private var date = Date()
     @State private var note = ""
+
+    init(personID: UUID) {
+        self.personID = personID
+        let saved = UserDefaults.standard.string(forKey: "defaultCurrency") ?? "INR"
+        _currency = State(initialValue: saved)
+    }
 
     private var amount: Double? {
         Double(amountText.replacingOccurrences(of: ",", with: "."))
     }
 
     var body: some View {
+        let _ = lang
         NavigationStack {
             Form {
-                Section("തരം") {
-                    Picker("തരം", selection: $type) {
+                Section(tr("Type", "തരം")) {
+                    Picker(tr("Type", "തരം"), selection: $type) {
                         ForEach(TxType.allCases) { t in
                             Text(t.title).tag(t)
                         }
@@ -26,26 +35,38 @@ struct AddTransactionView: View {
                     .pickerStyle(.inline)
                     .labelsHidden()
                 }
-                Section("തുക") {
-                    TextField("തുക", text: $amountText)
+
+                Section(tr("Amount", "തുക")) {
+                    TextField(tr("Amount", "തുക"), text: $amountText)
                         .keyboardType(.decimalPad)
+                    NavigationLink {
+                        CurrencyPickerView(selection: $currency)
+                    } label: {
+                        HStack {
+                            Text(tr("Currency", "കറൻസി"))
+                            Spacer()
+                            Text(currency).foregroundColor(.secondary)
+                        }
+                    }
                 }
+
                 Section {
-                    DatePicker("തീയതി", selection: $date, displayedComponents: .date)
-                    TextField("കുറിപ്പ് (optional)", text: $note)
+                    DatePicker(tr("Date", "തീയതി"), selection: $date, displayedComponents: .date)
+                    TextField(tr("Note (optional)", "കുറിപ്പ് (optional)"), text: $note)
                 }
             }
-            .navigationTitle("പുതിയ എൻട്രി")
+            .navigationTitle(tr("New entry", "പുതിയ എൻട്രി"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("റദ്ദാക്കുക") { dismiss() }
+                    Button(tr("Cancel", "റദ്ദാക്കുക")) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("സേവ്") {
+                    Button(tr("Save", "സേവ്")) {
                         if let amount = amount, amount > 0 {
                             store.addTxn(Txn(personID: personID, type: type,
-                                             amount: amount, date: date, note: note))
+                                             amount: amount, currency: currency,
+                                             date: date, note: note))
                             dismiss()
                         }
                     }
